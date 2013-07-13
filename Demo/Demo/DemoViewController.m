@@ -5,6 +5,12 @@
  @private
     ZCSlotMachine *_slotMachine;
     UIButton *_startButton;
+    
+    UIView *_slotContainerView;
+    UIImageView *_slotOneImageView;
+    UIImageView *_slotTwoImageView;
+    UIImageView *_slotThreeImageView;
+    UIImageView *_slotFourImageView;
 }
 
 #pragma mark - View LifeCycle
@@ -12,7 +18,7 @@
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-
+        
     }
     return self;
 }
@@ -52,17 +58,52 @@
     [_startButton addTarget:self action:@selector(start) forControlEvents:UIControlEventTouchUpInside];
     
     [self.view addSubview:_startButton];
+    
+    
+    _slotContainerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 180, 45)];
+    _slotContainerView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+    _slotContainerView.center = CGPointMake(self.view.frame.size.width / 2, 350);
+    
+    [self.view addSubview:_slotContainerView];
+    
+    _slotOneImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 45, 45)];
+    _slotOneImageView.contentMode = UIViewContentModeCenter;
+    
+    _slotTwoImageView = [[UIImageView alloc] initWithFrame:CGRectMake(45, 0, 45, 45)];
+    _slotTwoImageView.contentMode = UIViewContentModeCenter;
+    
+    _slotThreeImageView = [[UIImageView alloc] initWithFrame:CGRectMake(90, 0, 45, 45)];
+    _slotThreeImageView.contentMode = UIViewContentModeCenter;
+    
+    _slotFourImageView = [[UIImageView alloc] initWithFrame:CGRectMake(135, 0, 45, 45)];
+    _slotFourImageView.contentMode = UIViewContentModeCenter;
+    
+    [_slotContainerView addSubview:_slotOneImageView];
+    [_slotContainerView addSubview:_slotTwoImageView];
+    [_slotContainerView addSubview:_slotThreeImageView];
+    [_slotContainerView addSubview:_slotFourImageView];
 }
 
 #pragma mark - Private Methods
 
 - (void)start {
     NSUInteger slotIconCount = [_slotMachine.slotIcons count];
+    
+    NSUInteger slotOneIndex = abs(rand() % slotIconCount);
+    NSUInteger slotTwoIndex = abs(rand() % slotIconCount);
+    NSUInteger slotThreeIndex = abs(rand() % slotIconCount);
+    NSUInteger slotFourIndex = abs(rand() % slotIconCount);
+    
+    _slotOneImageView.image = [_slotMachine.slotIcons objectAtIndex:slotOneIndex];
+    _slotTwoImageView.image = [_slotMachine.slotIcons objectAtIndex:slotTwoIndex];
+    _slotThreeImageView.image = [_slotMachine.slotIcons objectAtIndex:slotThreeIndex];
+    _slotFourImageView.image = [_slotMachine.slotIcons objectAtIndex:slotFourIndex];
+    
     _slotMachine.slotResults = [NSArray arrayWithObjects:
-                                [NSNumber numberWithInteger:abs(rand() % slotIconCount)],
-                                [NSNumber numberWithInteger:abs(rand() % slotIconCount)],
-                                [NSNumber numberWithInteger:abs(rand() % slotIconCount)],
-                                [NSNumber numberWithInteger:abs(rand() % slotIconCount)],
+                                [NSNumber numberWithInteger:slotOneIndex],
+                                [NSNumber numberWithInteger:slotTwoIndex],
+                                [NSNumber numberWithInteger:slotThreeIndex],
+                                [NSNumber numberWithInteger:slotFourIndex],
                                 nil];
     
     [_slotMachine startSliding];
@@ -90,6 +131,14 @@
 
 - (CGFloat)slotSpacing {
     return 5.0f;
+}
+
+- (void)slotMachineWillStartSliding:(ZCSlotMachine *)slotMachine {
+    _startButton.enabled = NO;
+}
+
+- (void)slotMachineDidEndSliding:(ZCSlotMachine *)slotMachine {
+    _startButton.enabled = YES;
 }
 
 @end

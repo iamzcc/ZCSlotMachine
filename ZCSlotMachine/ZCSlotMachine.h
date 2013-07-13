@@ -21,15 +21,20 @@
 
 @interface ZCSlotMachine : UIView
 
-// UI Properties
+/****** UI Properties ******/
 @property (nonatomic) UIEdgeInsets contentInset;
 @property (nonatomic, strong) UIImage *backgroundImage;
 @property (nonatomic, strong) UIImage *coverImage;
 
-// Data Properties
+/****** Data Properties ******/
 @property (nonatomic) NSUInteger slotCount;
 @property (nonatomic, strong) NSArray *slotIcons;
 @property (nonatomic, strong) NSArray *slotResults;
+
+/****** Animation ******/
+
+// You can use this property to control the spinning speed, default to 0.14f
+@property (nonatomic) CGFloat singleUnitDuration;
 
 @property (nonatomic, weak) id <ZCSlotMachineDelegate> delegate;
 
