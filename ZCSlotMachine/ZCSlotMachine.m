@@ -12,14 +12,18 @@ static const NSUInteger kMinTurn = 3;
 
 @implementation ZCSlotMachine {
  @private
+    // UI
     UIImageView *_backgroundImageView;
     UIImageView *_coverImageView;
     UIView *_contentView;
-    NSUInteger _slotCount;
-    NSArray *_slotIcons;
+    UIEdgeInsets _contentInset;
     NSMutableArray *_slotScrollLayerArray;
+    
+    // Data
     NSArray *_slotResults;
     NSArray *_currentSlotResults;
+    
+    __weak id<ZCSlotMachineDataSource> _dataSource;
 }
 
 #pragma mark - View LifeCycle
@@ -49,6 +53,8 @@ static const NSUInteger kMinTurn = 3;
         _slotScrollLayerArray = [NSMutableArray array];
         
         self.singleUnitDuration = 0.14f;
+        
+        _contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
     }
     return self;
 }
@@ -63,77 +69,16 @@ static const NSUInteger kMinTurn = 3;
     _coverImageView.image = coverImage;
 }
 
+- (UIEdgeInsets)contentInset {
+    return _contentInset;
+}
+
 - (void)setContentInset:(UIEdgeInsets)contentInset {
+    _contentInset = contentInset;
+    
     CGRect viewFrame = self.frame;
     
-    _contentView.frame = CGRectMake(contentInset.left, contentInset.top, viewFrame.size.width - contentInset.left - contentInset.right, viewFrame.size.height - contentInset.top - contentInset.bottom);
-}
-
-- (NSUInteger)slotCount {
-    return _slotCount;
-}
-
-- (void)setSlotCount:(NSUInteger)slotCount {
-    _slotCount = slotCount;
-    
-    CGFloat slotSpacing = 0;
-    if ([self.delegate respondsToSelector:@selector(slotSpacing)]) {
-        slotSpacing = [self.delegate slotSpacing];
-    }
-    
-    CGFloat slotWidth = _contentView.frame.size.width / slotCount;
-    if ([self.delegate respondsToSelector:@selector(slotWidth)]) {
-        slotWidth = [self.delegate slotWidth];
-    }
-    
-    for (int i = 0; i < slotCount; i++) {
-        CALayer *slotContainerLayer = [[CALayer alloc] init];
-        slotContainerLayer.frame = CGRectMake(i * (slotWidth + slotSpacing), 0, slotWidth, _contentView.frame.size.height);
-        slotContainerLayer.masksToBounds = YES;
-        
-        CALayer *slotScrollLayer = [[CALayer alloc] init];
-        slotScrollLayer.frame = CGRectMake(0, 0, slotWidth, _contentView.frame.size.height);
-#if SHOW_BORDER
-        slotScrollLayer.borderColor = [UIColor greenColor].CGColor;
-        slotScrollLayer.borderWidth = 1;
-#endif
-        [slotContainerLayer addSublayer:slotScrollLayer];
-        
-        [_contentView.layer addSublayer:slotContainerLayer];
-        
-        [_slotScrollLayerArray addObject:slotScrollLayer];
-    }
-}
-
-- (void)setSlotIcons:(NSArray *)slotIcons {
-    _slotIcons = slotIcons;
-    
-    CGFloat singleUnitHeight = _contentView.frame.size.height / 3;
-    NSUInteger iconCount = [slotIcons count];
-    NSUInteger slotCount = [_slotScrollLayerArray count];
-    for (int i = 0; i < slotCount; i++) {
-        CALayer *slotScrollLayer = [_slotScrollLayerArray objectAtIndex:i];
-        NSInteger scrollLayerTopIndex = - (i + kMinTurn + 3) * iconCount;
-        
-        for (int j = 0; j > scrollLayerTopIndex; j--) {
-            UIImage *iconImage = [slotIcons objectAtIndex:abs(j) % slotCount];
-            
-            CALayer *iconImageLayer = [[CALayer alloc] init];
-            // adjust the beginning offset of the first unit
-            NSInteger offsetYUnit = j + 1 + iconCount;
-            iconImageLayer.frame = CGRectMake(0, offsetYUnit * singleUnitHeight, slotScrollLayer.frame.size.width, singleUnitHeight);
-            
-            iconImageLayer.contents = (id)iconImage.CGImage;
-            iconImageLayer.contentsScale = iconImage.scale;
-            iconImageLayer.contentsGravity = kCAGravityCenter;
-#if SHOW_BORDER
-            iconImageLayer.borderColor = [UIColor redColor].CGColor;
-            iconImageLayer.borderWidth = 1;
-#endif
-            
-            [slotScrollLayer addSublayer:iconImageLayer];
-        }
-    }
+    _contentView.frame = CGRectMake(_contentInset.left, _contentInset.top, viewFrame.size.width - _contentInset.left - _contentInset.right, viewFrame.size.height - _contentInset.top - _contentInset.bottom);
 }
 
 - (NSArray *)slotResults {
@@ -154,6 +99,83 @@ static const NSUInteger kMinTurn = 3;
     }
 }
 
+- (id<ZCSlotMachineDataSource>)dataSource {
+    return _dataSource;
+}
+
+- (void)setDataSource:(id<ZCSlotMachineDataSource>)dataSource {
+    _dataSource = dataSource;
+    
+    [self reloadData];
+}
+
+- (void)reloadData {
+    if (self.dataSource) {
+        for (CALayer *containerLayer in _contentView.layer.sublayers) {
+            [containerLayer removeFromSuperlayer];
+        }
+        _slotScrollLayerArray = [NSMutableArray array];
+        
+        NSUInteger numberOfSlots = [self.dataSource numberOfSlotsInSlotMachine:self];
+        CGFloat slotSpacing = 0;
+        if ([self.dataSource respondsToSelector:@selector(slotSpacingInSlotMachine:)]) {
+            slotSpacing = [self.dataSource slotSpacingInSlotMachine:self];
+        }
+        
+        CGFloat slotWidth = _contentView.frame.size.width / numberOfSlots;
+        if ([self.dataSource respondsToSelector:@selector(slotWidthInSlotMachine:)]) {
+            slotWidth = [self.dataSource slotWidthInSlotMachine:self];
+        }
+        
+        for (int i = 0; i < numberOfSlots; i++) {
+            CALayer *slotContainerLayer = [[CALayer alloc] init];
+            slotContainerLayer.frame = CGRectMake(i * (slotWidth + slotSpacing), 0, slotWidth, _contentView.frame.size.height);
+            slotContainerLayer.masksToBounds = YES;
+            
+            CALayer *slotScrollLayer = [[CALayer alloc] init];
+            slotScrollLayer.frame = CGRectMake(0, 0, slotWidth, _contentView.frame.size.height);
+#if SHOW_BORDER
+            slotScrollLayer.borderColor = [UIColor greenColor].CGColor;
+            slotScrollLayer.borderWidth = 1;
+#endif
+            [slotContainerLayer addSublayer:slotScrollLayer];
+            
+            [_contentView.layer addSublayer:slotContainerLayer];
+            
+            [_slotScrollLayerArray addObject:slotScrollLayer];
+        }
+        
+        CGFloat singleUnitHeight = _contentView.frame.size.height / 3;
+        
+        NSArray *slotIcons = [self.dataSource iconsForSlotsInSlotMachine:self];
+        NSUInteger iconCount = [slotIcons count];
+        
+        for (int i = 0; i < numberOfSlots; i++) {
+            CALayer *slotScrollLayer = [_slotScrollLayerArray objectAtIndex:i];
+            NSInteger scrollLayerTopIndex = - (i + kMinTurn + 3) * iconCount;
+            
+            for (int j = 0; j > scrollLayerTopIndex; j--) {
+                UIImage *iconImage = [slotIcons objectAtIndex:abs(j) % numberOfSlots];
+                
+                CALayer *iconImageLayer = [[CALayer alloc] init];
+                // adjust the beginning offset of the first unit
+                NSInteger offsetYUnit = j + 1 + iconCount;
+                iconImageLayer.frame = CGRectMake(0, offsetYUnit * singleUnitHeight, slotScrollLayer.frame.size.width, singleUnitHeight);
+                
+                iconImageLayer.contents = (id)iconImage.CGImage;
+                iconImageLayer.contentsScale = iconImage.scale;
+                iconImageLayer.contentsGravity = kCAGravityCenter;
+#if SHOW_BORDER
+                iconImageLayer.borderColor = [UIColor redColor].CGColor;
+                iconImageLayer.borderWidth = 1;
+#endif
+                
+                [slotScrollLayer addSublayer:iconImageLayer];
+            }
+        }
+    }
+}
+
 #pragma mark - Public Methods
 
 - (void)startSliding {
@@ -167,6 +189,9 @@ static const NSUInteger kMinTurn = 3;
         if ([self.delegate respondsToSelector:@selector(slotMachineWillStartSliding:)]) {
             [self.delegate slotMachineWillStartSliding:self];
         }
+        
+        NSArray *slotIcons = [self.dataSource iconsForSlotsInSlotMachine:self];
+        NSUInteger slotIconsCount = [slotIcons count];
         
         __block NSMutableArray *completePositionArray = [NSMutableArray array];
         
@@ -191,7 +216,7 @@ static const NSUInteger kMinTurn = 3;
                 NSUInteger resultIndex = [[self.slotResults objectAtIndex:i] unsignedIntegerValue];
                 NSUInteger currentIndex = [[_currentSlotResults objectAtIndex:i] unsignedIntegerValue];
                 
-                for (int j = 0; j < [self.slotIcons count] * (kMinTurn + i) + resultIndex - currentIndex; j++) {
+                for (int j = 0; j < slotIconsCount * (kMinTurn + i) + resultIndex - currentIndex; j++) {
                     CALayer *iconLayer = [slotScrollLayer.sublayers objectAtIndex:j];
                     [toBeDeletedLayerArray addObject:iconLayer];
                 }
@@ -204,7 +229,7 @@ static const NSUInteger kMinTurn = 3;
                     toBeAddedLayer.contentsScale = toBeDeletedLayer.contentsScale;
                     toBeAddedLayer.contentsGravity = toBeDeletedLayer.contentsGravity;
                     
-                    CGFloat shiftY = [self.slotIcons count] * toBeAddedLayer.frame.size.height * (kMinTurn + i + 3);
+                    CGFloat shiftY = slotIconsCount * toBeAddedLayer.frame.size.height * (kMinTurn + i + 3);
                     toBeAddedLayer.position = CGPointMake(toBeAddedLayer.position.x, toBeAddedLayer.position.y - shiftY);
                     
                     [toBeDeletedLayer removeFromSuperlayer];
@@ -225,7 +250,7 @@ static const NSUInteger kMinTurn = 3;
             NSUInteger resultIndex = [[self.slotResults objectAtIndex:i] unsignedIntegerValue];
             NSUInteger currentIndex = [[_currentSlotResults objectAtIndex:i] unsignedIntegerValue];
             
-            NSUInteger howManyUnit = (i + kMinTurn) * [self.slotIcons count] + resultIndex - currentIndex;
+            NSUInteger howManyUnit = (i + kMinTurn) * slotIconsCount + resultIndex - currentIndex;
             CGFloat slideY = howManyUnit * (_contentView.frame.size.height / 3);
             
             CABasicAnimation *slideAnimation = [CABasicAnimation animationWithKeyPath:keyPath];

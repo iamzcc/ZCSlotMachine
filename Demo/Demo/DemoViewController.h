@@ -3,6 +3,6 @@
 
 #import "ZCSlotMachine.h"
 
-@interface DemoViewController : UIViewController <ZCSlotMachineDelegate>
+@interface DemoViewController : UIViewController <ZCSlotMachineDelegate, ZCSlotMachineDataSource>
 
 @end

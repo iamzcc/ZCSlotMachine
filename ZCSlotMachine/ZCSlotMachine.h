@@ -7,13 +7,21 @@
 
 @protocol ZCSlotMachineDelegate <NSObject>
 
-@required
-- (CGFloat)slotWidth;
-
 @optional
 - (void)slotMachineWillStartSliding:(ZCSlotMachine *)slotMachine;
 - (void)slotMachineDidEndSliding:(ZCSlotMachine *)slotMachine;
-- (CGFloat)slotSpacing;
+
+@end
+
+@protocol ZCSlotMachineDataSource <NSObject>
+
+@required
+- (NSUInteger)numberOfSlotsInSlotMachine:(ZCSlotMachine *)slotMachine;
+- (NSArray *)iconsForSlotsInSlotMachine:(ZCSlotMachine *)slotMachine;
+
+@optional
+- (CGFloat)slotWidthInSlotMachine:(ZCSlotMachine *)slotMachine;
+- (CGFloat)slotSpacingInSlotMachine:(ZCSlotMachine *)slotMachine;
 
 @end
 
@@ -27,8 +35,6 @@
 @property (nonatomic, strong) UIImage *coverImage;
 
 /****** Data Properties ******/
-@property (nonatomic) NSUInteger slotCount;
-@property (nonatomic, strong) NSArray *slotIcons;
 @property (nonatomic, strong) NSArray *slotResults;
 
 /****** Animation ******/
@@ -37,6 +43,7 @@
 @property (nonatomic) CGFloat singleUnitDuration;
 
 @property (nonatomic, weak) id <ZCSlotMachineDelegate> delegate;
+@property (nonatomic, weak) id <ZCSlotMachineDataSource> dataSource;
 
 - (void)startSliding;
 
