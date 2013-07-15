@@ -1,4 +1,4 @@
-### SCREEN SHOT
+### Screen Shot
 ---
 
 ### Requirements
@@ -7,7 +7,7 @@
 * QuartzCore.framework
 * **ARC**
 
-### HOW TO USE
+### How To Use
 ---
 
 ZCSlotMachine is a subclass of UIView. The demo application shows how it is used.
@@ -54,9 +54,9 @@ And finally get the slot machine started.
 
 ### Credits
 ---
+The avatar icons used in the demo app was designed by [风尾竹](http://www.booui.com). You should ask for authorization if you want to use it in your project. 
 
-
-### LICENSE
+### License
 ---
 
 The MIT License
