@@ -1,8 +1,8 @@
 ### Screen Shot
 ---
-![Begin](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot1.png)
-![Sliding](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot2.png)
-![End](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot3.png)
+![Begin](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot1.jpg)
+![Sliding](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot2.jpg)
+![End](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot3.jpg)
 
 ### Requirements
 ---
