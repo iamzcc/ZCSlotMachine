@@ -155,7 +155,7 @@ static const NSUInteger kMinTurn = 3;
             NSInteger scrollLayerTopIndex = - (i + kMinTurn + 3) * iconCount;
             
             for (int j = 0; j > scrollLayerTopIndex; j--) {
-                UIImage *iconImage = [slotIcons objectAtIndex:abs(j) % numberOfSlots];
+                UIImage *iconImage = [slotIcons objectAtIndex:abs(j) % iconCount];
                 
                 CALayer *iconImageLayer = [[CALayer alloc] init];
                 // adjust the beginning offset of the first unit
