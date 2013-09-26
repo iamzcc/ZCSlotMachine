@@ -1,5 +1,7 @@
-### Screen Shot
+### Video & Screen Shot
 ---
+Watch video on [Youtube](http://youtu.be/gUy4DD948AI)
+
 ![Begin](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot1.jpg)
 ![Sliding](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot2.jpg)
 ![End](http://iamzcc.github.com/ZCSlotMachine/images/README/Slot3.jpg)
